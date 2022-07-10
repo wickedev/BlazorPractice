@@ -1,0 +1,60 @@
+﻿@page "/blog"
+
+@using blazor_sample.Data
+@inject BloggingService BloggingService
+
+<PageTitle>Blogs</PageTitle>
+
+<h1>Blog</h1>
+
+@if (newPost == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var post in posts)
+        {
+            <li>
+                <div>@post.Id</div>
+                <div>@post.Title</div>
+                <div>@post.Content</div>
+            </li>
+            }
+    </ul>
+}
+
+<EditForm Model="@newPost" OnValidSubmit="@AddPost">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <InputText id="title" @bind-Value="newPost.Title" />
+    <InputText id="content" @bind-Value="newPost.Content" />
+
+    <button type="submit">Submit</button>
+</EditForm>
+    
+@code {
+    private List<Post>? posts;
+    private Post newPost = new();
+
+    protected override void OnInitialized()
+    {
+        posts = BloggingService.GetPosts();
+    }
+
+    private void AddPost()
+    {
+        Console.WriteLine("AddPost: {0}", newPost);
+        BloggingService.Posting(newPost);
+        posts = BloggingService.GetPosts();
+        newPost = new();
+    }
+
+    private void DeletePost(int id)
+    {
+        BloggingService.Delete(id);
+        posts = BloggingService.GetPosts();
+    }
+}
